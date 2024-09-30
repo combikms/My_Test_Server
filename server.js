@@ -26,6 +26,16 @@ const post = [
     }
 ]
 
+const comment = [
+    { postId: '0', username: '강인석', comment: 'ㅎㅇ', id: 0 },
+    { postId: '0', username: '정우제', comment: '만나서 반가워', id: 1 },
+    { postId: '1', username: '정우제', comment: '굿', id: 2 },
+    { postId: '1', username: '정우제', comment: 'hello world', id: 3 },
+    { postId: '1', username: '정우제', comment: 'ABCDEFG', id: 4 },
+    { postId: '2', username: '홍길동', comment: '안녕', id: 5 }
+]
+
+
 app.use(cors());
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -83,4 +93,16 @@ app.put('/:id', (req, res) => {
     } else {
         res.status(404).send({ message: 'Post not found' });
     }
+});
+
+app.post('/comment', (req, res) => {
+    console.log(req.body)
+    const data = req.body
+    if (comment.length == 0) {
+        data.id = 0
+    } else {
+        data.id = comment[comment.length - 1].id + 1
+    }
+    comment.push(req.body)
+    console.log(comment)
 });
