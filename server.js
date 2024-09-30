@@ -27,12 +27,12 @@ const post = [
 ]
 
 const comment = [
-    { postId: '0', username: '강인석', comment: 'ㅎㅇ', id: 0 },
-    { postId: '0', username: '정우제', comment: '만나서 반가워', id: 1 },
-    { postId: '1', username: '정우제', comment: '굿', id: 2 },
-    { postId: '1', username: '정우제', comment: 'hello world', id: 3 },
-    { postId: '1', username: '정우제', comment: 'ABCDEFG', id: 4 },
-    { postId: '2', username: '홍길동', comment: '안녕', id: 5 }
+    { postId: '0', username: '강인석', content: '100마넌', id: 0 },
+    { postId: '0', username: '정우제', content: '70마넌', id: 1 },
+    { postId: '1', username: '여원용', content: '싫어', id: 2 },
+    { postId: '1', username: '박동수', content: '고마워', id: 3 },
+    { postId: '1', username: '강인석', content: '저요!', id: 4 },
+    { postId: '2', username: '홍길동', content: '알아서 찾아봐', id: 5 }
 ]
 
 
@@ -105,4 +105,15 @@ app.post('/comment', (req, res) => {
     }
     comment.push(req.body)
     console.log(comment)
+});
+
+app.get('/comment/:id', (req, res) => {
+    const commentsOfPost = []
+    comment.forEach((data) => {
+        if (data.postId == req.params.id)
+            commentsOfPost.push(data);
+    });
+    console.log(`${req.params.id}번 게시글의 댓글들을 전송합니다.`);
+    console.log(commentsOfPost);
+    res.send(commentsOfPost);
 });
