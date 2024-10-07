@@ -65,6 +65,8 @@ const comment = [
     { postId: '2', username: '홍길동', content: '알아서 찾아봐', id: 5 }
 ]
 
+const users = []
+
 
 app.use(cors());
 app.use(express.json())
@@ -146,4 +148,28 @@ app.get('/comment/:id', (req, res) => {
     console.log(`${req.params.id}번 게시글의 댓글들을 전송합니다.`);
     console.log(commentsOfPost);
     res.send(commentsOfPost);
+});
+
+// 회원가입
+app.post('/register', (req, res) => {
+    const { username, password } = req.body;
+
+    // 간단한 유효성 검사 (이미 등록된 유저 확인)
+    const existingUser = users.find(user => user.username === username);
+    if (existingUser) {
+        return res.status(400).json({ message: '이미 사용 중인 아이디입니다.' });
+    }
+
+    // 새로운 유저 추가
+    const newUser = {
+        id: users.length + 1, // 간단한 ID 생성
+        username,
+        password
+    };
+    users.push(newUser);
+
+    // 회원가입 성공 응답
+    res.status(201).json({ message: '회원가입 성공', user: newUser });
+
+    console.log(users);
 });
