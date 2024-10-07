@@ -1,6 +1,8 @@
 const express = require('express')
 const cors = require('cors');
 const app = express()
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = 'your_jwt_secret_key';
 
 const post = [
     {
@@ -172,4 +174,43 @@ app.post('/register', (req, res) => {
     res.status(201).json({ message: '회원가입 성공', user: newUser });
 
     console.log(users);
+});
+
+// 로그인
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // 유저 검증
+    const user = users.find(user => user.username === username && user.password === password);
+    if (!user) {
+        return res.status(401).json({ message: '아이디 또는 비밀번호가 잘못되었습니다.' });
+    }
+
+    // JWT 생성
+    const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+
+    // 로그인 성공 시 토큰 반환
+    res.json({ message: '로그인 성공', token });
+    console.log('Logged in');
+});
+
+// 인증 정보 검사 (JWT 인증 필요)
+app.get('/auth', (req, res) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+        return res.status(401).json({ message: '토큰이 없습니다.' });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    // 토큰 검증
+    jwt.verify(token, SECRET_KEY, (err, user) => {
+        if (err) {
+            return res.status(403).json({ message: '유효하지 않은 토큰입니다.' });
+        }
+
+        // 인증 성공
+        res.json({ message: '인증 성공', user });
+    });
 });
