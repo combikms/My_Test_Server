@@ -1,74 +1,20 @@
 const express = require('express')
 const cors = require('cors');
 const app = express()
+
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'your_jwt_secret_key';
 
-const post = [
-    {
-        title: '학교 근로하면 달에 얼마받아요?',
-        content: '평균',
-        id: 0
-    },
-    {
-        title: '침착맨 전문 시청 1팀 카드지갑 잃어버리신 분?',
-        content: '쪽지주세용 (조공 있으면 더 좋고 ㅎ 농담임)',
-        id: 1
-    },
-    {
-        title: '수강꾸러미',
-        content: '확정 뜨는게 언제였지? 왜 확정 전이라 뜨냐',
-        id: 2
-    },
-    {
-        title: '반시공님들',
-        content: '상담내용에머씀?난 그냥 교육과정대로 잘했는지 적었는데.\n' +
-            '그리고 이번주 화욜에 제출했는데 아직까지 미승인인데 다들 승인남?지도교수ㅇㅇㅇ 임',
-        id: 3
-    },
-    {
-        title: '금공에서 쿠팡가려면',
-        content: '상쿠펀치로 보니깐 대구4센밖에 없나여?',
-        id: 4
-    },
-    {
-        title: '진짜 T1전만 보고 과제할게요',
-        content: '진짜루',
-        id: 5
-    },
-    {
-        title: '오늘 10시쯤 택시탈사람',
-        content: '구미역에서 학교',
-        id: 6
-    },
-    {
-        title: '푸름4에서 배달음식',
-        content: '푸름4에서 배달음식 시키지도 않았는데 짬뽕이랑 탕수육 가져간놈 누구냐',
-        id: 7
-    },
-    {
-        title: '인공지능 공학과 수업 질문',
-        content: '자연어처리, 딥러닝 설계 과목 들을만 한가요??',
-        id: 8
-    },
-    {
-        title: '멘토분이랑 상담하면 보통 뭔얘기하나요??',
-        content: '1학년 복학생인데 멘토 대면상담? 해야한다고 멘토분한테 연락 왔는데 보통 무슨 얘기하나요??',
-        id: 9
-    }
-]
+const posts = require('./mockdata/posts');
+const comments = require('./mockdata/comments');
 
-const comment = [
-    { postId: '0', username: '강인석', content: '100마넌', id: 0 },
-    { postId: '0', username: '정우제', content: '70마넌', id: 1 },
-    { postId: '1', username: '여원용', content: '싫어', id: 2 },
-    { postId: '1', username: '박동수', content: '고마워', id: 3 },
-    { postId: '1', username: '강인석', content: '저요!', id: 4 },
-    { postId: '2', username: '홍길동', content: '알아서 찾아봐', id: 5 }
-]
+let post = [...posts];
+let comment = [...comments];
 
+let pid = post.length - 1;
+let cid = comment.length - 1;
 const users = []
-
+let uid = 0;
 
 app.use(cors());
 app.use(express.json())
@@ -91,11 +37,7 @@ app.get('/post/:id', (req, res) => {
 
 app.post('/', (req, res) => {
     const data = req.body
-    if (post.length == 0) {
-        data.id = 0
-    } else {
-        data.id = post[post.length - 1].id + 1
-    }
+    data.id = pid++;
     post.push(req.body)
     console.log(post)
 })
@@ -132,11 +74,7 @@ app.put('/:id', (req, res) => {
 app.post('/comment', (req, res) => {
     console.log(req.body)
     const data = req.body
-    if (comment.length == 0) {
-        data.id = 0
-    } else {
-        data.id = comment[comment.length - 1].id + 1
-    }
+    data.id = cid++;
     comment.push(req.body)
     console.log(comment)
 });
@@ -154,7 +92,7 @@ app.get('/comment/:id', (req, res) => {
 
 // 회원가입
 app.post('/register', (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, displayname } = req.body;
 
     // 간단한 유효성 검사 (이미 등록된 유저 확인)
     const existingUser = users.find(user => user.username === username);
@@ -164,9 +102,10 @@ app.post('/register', (req, res) => {
 
     // 새로운 유저 추가
     const newUser = {
-        id: users.length + 1, // 간단한 ID 생성
+        id: uid++,
         username,
-        password
+        password,
+        displayname
     };
     users.push(newUser);
 
@@ -178,7 +117,7 @@ app.post('/register', (req, res) => {
 
 // 로그인
 app.post('/login', (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, displayname } = req.body;
 
     // 유저 검증
     const user = users.find(user => user.username === username && user.password === password);
@@ -187,7 +126,7 @@ app.post('/login', (req, res) => {
     }
 
     // JWT 생성
-    const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, username: user.username, displayname: user.displayname }, SECRET_KEY, { expiresIn: '1h' });
 
     // 로그인 성공 시 토큰 반환
     res.json({ message: '로그인 성공', token });
